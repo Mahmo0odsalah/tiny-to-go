@@ -30,7 +30,7 @@ func lex(in string) (o []lexed_line, err error){
 	ta := make([]string, 0);
 	for te := 0; te < len(in); te++{
 		if in[te] == '\n' { // Line ended, lex the current line and move on
-			if te - ts > 0 { // If the token is just a space, ignore
+			if te > ts { // If the token is just a space, ignore
 				ta = append(ta, in[ts:te])
 			}
 			if len(ta) > 0 {
@@ -42,10 +42,13 @@ func lex(in string) (o []lexed_line, err error){
 			}
 			ls = te + 1;
 			ts = ls;
-		} else if in[te] == ' '{ // Token ended, append to ta
-			if te - ts > 0 { // If the token is just a space, ignore
+		} else if in[te] == ' ' && in[ts] != '"' { // Token ended, append to ta. Spaces are only allowed inside a string
+			if te > ts { // If the token is just a space, ignore
 				ta = append(ta, in[ts:te])
 			}
+			ts = te + 1
+		} else if in[te] == '"' && in[ts] == '"' && te > ts {
+			ta = append(ta, in[ts:te + 1])
 			ts = te + 1
 		}
 	}
